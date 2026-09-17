@@ -1,0 +1,13 @@
+server:
+  port: ${PORT:8081}
+
+app:
+  sqlite-path: ${SQLITE_PATH:/data/calculator.db}
+
+spring:
+  datasource:
+    url: jdbc:sqlite:${app.sqlite-path}
+    driver-class-name: org.sqlite.JDBC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration

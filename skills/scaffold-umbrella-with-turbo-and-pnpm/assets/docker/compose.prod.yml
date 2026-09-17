@@ -1,0 +1,6 @@
+# Production-shaped profile: no bind-mounts, start scripts only.
+# docker compose -f docker/docker-compose.yml -f docker/compose.prod.yml up --build
+services:
+  example-app:
+    volumes: []
+    command: ["pnpm", "--filter", "@umbrella/example-app", "build"]

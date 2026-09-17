@@ -1,0 +1,16 @@
+.git
+**/.git
+**/node_modules
+**/dist
+**/.angular
+**/cdk.out
+.turbo
+**/.DS_Store
+**/bin
+**/obj
+**/target
+**/__pycache__
+**/.venv
+.env
+.env.*.local
+infra/cdk/Constants.Deployment.ts

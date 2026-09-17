@@ -1,0 +1,18 @@
+[package]
+name = "example-tauri"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "example_tauri_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "example-tauri"
+path = "src/main.rs"
+
+[dependencies]
+tauri = { version = "2.2.5", features = [] }
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.135"

@@ -1,0 +1,25 @@
+{
+  "name": "@umbrella/capacitor-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "cap sync",
+    "build": "node --eval \"process.exit(0)\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --eval \"process.exit(0)\"",
+    "lint": "prettier --check .",
+    "format:check": "prettier --check .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.0",
+    "@capacitor/core": "6.2.0",
+    "@capacitor/ios": "6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.7.3"
+  }
+}

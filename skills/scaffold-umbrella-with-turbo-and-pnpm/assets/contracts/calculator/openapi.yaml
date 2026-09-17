@@ -1,0 +1,104 @@
+openapi: 3.1.0
+info:
+  title: Calculator persist API
+  version: 0.1.0
+  description: Single-row calculator value owned by the microservice and proxied by the BFF.
+paths:
+  /healthz:
+    get:
+      operationId: healthz
+      responses:
+        "200":
+          description: Liveness
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /readyz:
+    get:
+      operationId: readyz
+      responses:
+        "200":
+          description: Ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        "503":
+          description: Not ready
+  /value:
+    get:
+      operationId: getValue
+      responses:
+        "200":
+          description: Current stored value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoredValue"
+              examples:
+                empty:
+                  $ref: "#/components/examples/EmptyValue"
+                stored:
+                  $ref: "#/components/examples/StoredValue"
+    put:
+      operationId: putValue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValueBody"
+            examples:
+              valid:
+                $ref: "#/components/examples/PutValue"
+              invalid:
+                $ref: "#/components/examples/PutValueInvalid"
+      responses:
+        "200":
+          description: Upserted value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoredValue"
+        "400":
+          description: Invalid body
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, unavailable]
+    StoredValue:
+      type: object
+      required: [value, updatedAt]
+      properties:
+        value:
+          type: [number, "null"]
+        updatedAt:
+          type: [string, "null"]
+          format: date-time
+    ValueBody:
+      type: object
+      required: [value]
+      properties:
+        value:
+          type: number
+  examples:
+    EmptyValue:
+      value:
+        value: null
+        updatedAt: null
+    StoredValue:
+      value:
+        value: 12
+        updatedAt: "2026-01-01T00:00:00Z"
+    PutValue:
+      value:
+        value: 12
+    PutValueInvalid:
+      value:
+        value: "nope"

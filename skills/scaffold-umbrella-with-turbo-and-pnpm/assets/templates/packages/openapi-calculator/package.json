@@ -1,0 +1,17 @@
+{
+  "name": "@umbrella/calculator-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./openapi.yaml",
+    "./fixtures/*": "./fixtures/*"
+  },
+  "scripts": {
+    "build": "node --eval \"process.exit(0)\"",
+    "lint": "node ../../../../scripts/lint-openapi.mjs openapi.yaml",
+    "test": "node --experimental-strip-types --test src/contract.test.ts",
+    "typecheck": "node --eval \"process.exit(0)\"",
+    "codegen:check": "node --eval \"process.exit(0)\""
+  }
+}

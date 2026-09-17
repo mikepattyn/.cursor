@@ -1,0 +1,52 @@
+openapi: 3.1.0
+info:
+  title: Calculator persist API
+  version: 0.1.0
+  description: Single-row calculator value owned by the microservice and proxied by the BFF.
+paths:
+  /healthz:
+    get:
+      operationId: healthz
+      responses:
+        "200":
+          description: Liveness
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /readyz:
+    get:
+      operationId: readyz
+      responses:
+        "200":
+          description: Ready
+  /value:
+    get:
+      operationId: getValue
+      responses:
+        "200":
+          description: Current stored value
+    put:
+      operationId: putValue
+      responses:
+        "200":
+          description: Upserted value
+        "400":
+          description: Invalid body
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, unavailable]
+    StoredValue:
+      type: object
+      required: [value, updatedAt]
+      properties:
+        value:
+          type: [number, "null"]
+        updatedAt:
+          type: [string, "null"]

@@ -1,0 +1,3 @@
+# Optional overlay: host bind-mounts and polling. Included by default in the skill copy.
+# docker compose -f docker/docker-compose.yml -f docker/compose.dev.yml up --build
+services: {}

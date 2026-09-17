@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://umbrella.local/catalog/templates.schema.json",
+  "title": "Umbrella scaffold catalog",
+  "type": "object",
+  "required": ["version", "defaults", "topologies", "templates"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "defaults": {
+      "type": "object",
+      "required": ["packageManager", "node", "pnpm", "turbo"],
+      "properties": {
+        "packageManager": { "type": "string" },
+        "node": { "type": "string" },
+        "pnpm": { "type": "string" },
+        "turbo": { "type": "string" },
+        "awsRegion": { "type": "string" },
+        "domainName": { "type": "string" }
+      }
+    },
+    "topologies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["description", "requiredRoles"],
+        "properties": {
+          "description": { "type": "string" },
+          "requiredRoles": { "type": "array", "items": { "type": "string" } },
+          "optionalRoles": { "type": "array", "items": { "type": "string" } },
+          "recommended": { "type": "object" }
+        }
+      }
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "tier", "roles", "source", "destination"],
+        "properties": {
+          "id": { "type": "string" },
+          "tier": { "enum": ["core", "preview", "recipe"] },
+          "roles": { "type": "array", "items": { "type": "string" } },
+          "source": { "type": "string" },
+          "destination": { "type": "string" },
+          "kind": { "type": "string" },
+          "workspace": { "type": "boolean" },
+          "packageManager": { "type": "string" },
+          "runtime": { "type": "string" },
+          "generator": { "type": "string" },
+          "lockfiles": { "type": "array", "items": { "type": "string" } },
+          "commands": { "type": "object", "additionalProperties": { "type": "string" } },
+          "ports": { "type": "object", "additionalProperties": { "type": "integer" } },
+          "health": { "type": "string" },
+          "healthcheck": { "type": "string" },
+          "dockerContext": { "type": "string" },
+          "dockerfile": { "type": "string" },
+          "deployment": {
+            "type": "array",
+            "items": { "enum": ["local-only", "container", "static", "node-server", "mobile", "desktop"] }
+          },
+          "requiredTools": { "type": "array", "items": { "type": "string" } },
+          "incompatibilities": { "type": "array", "items": { "type": "string" } },
+          "variables": { "type": "array", "items": { "type": "string" } },
+          "expectedFiles": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

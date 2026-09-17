@@ -1,0 +1,3 @@
+* @umbrella/maintainers
+/apps/backend/ @umbrella/backend
+/packages/contracts/ @umbrella/api

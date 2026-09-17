@@ -1,0 +1,15 @@
+title = "umbrella gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Documented placeholders only"
+regexes = [
+  '''123456789012''',
+  '''Z1234567890EXAMPLE''',
+]
+paths = [
+  '''Constants\.Deployment\.ts\.example$''',
+  '''\.env\.example$''',
+]

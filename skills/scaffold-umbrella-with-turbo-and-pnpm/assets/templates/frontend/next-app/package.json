@@ -1,0 +1,31 @@
+{
+  "name": "@umbrella/example-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0 --port 4200",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0 --port 4200",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --experimental-strip-types --test src/**/*.test.ts",
+    "lint": "next lint",
+    "format:check": "prettier --check .",
+    "format": "prettier --write ."
+  },
+  "comment:deploymentMode": "Set DEPLOYMENT_MODE to static-export or node-server. Route handlers exist only in node-server.",
+  "dependencies": {
+    "@umbrella/example-calculator": "workspace:*",
+    "@umbrella/example-calculator-ui": "workspace:*",
+    "next": "15.1.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@types/react": "19.0.8",
+    "@types/react-dom": "19.0.3",
+    "prettier": "^3.8.1",
+    "typescript": "~5.7.3"
+  }
+}

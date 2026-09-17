@@ -1,0 +1,46 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  npm:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Changesets or no-op
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -d .changeset ]; then
+            echo "No .changeset directory; npm release is a no-op."
+            exit 0
+          fi
+          if ! grep -q 'publishable: true' scaffold.manifest.yaml 2>/dev/null; then
+            echo "Packages default to private. Set publishable: true in scaffold.manifest.yaml to enable Changesets publish."
+            exit 0
+          fi
+          pnpm exec changeset publish
+
+  notes:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Native publish notes
+        run: |
+          echo "uv: bump versions in pyproject.toml and publish from that project, not npm."
+          echo "dotnet: pack with dotnet pack; do not wrap as an npm package."
+          echo "cargo: publish from the crate directory when crates.io is opted in."

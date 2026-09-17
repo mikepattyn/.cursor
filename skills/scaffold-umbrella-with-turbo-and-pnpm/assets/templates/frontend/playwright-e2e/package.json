@@ -1,0 +1,19 @@
+{
+  "name": "@umbrella/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "build": "node --eval \"process.exit(0)\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "prettier --check .",
+    "format:check": "prettier --check .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1",
+    "prettier": "^3.8.1",
+    "typescript": "~5.7.3"
+  }
+}

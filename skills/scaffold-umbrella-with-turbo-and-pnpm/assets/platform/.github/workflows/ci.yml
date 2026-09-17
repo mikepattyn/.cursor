@@ -1,0 +1,80 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  js:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec turbo run build test lint typecheck format:check
+
+  contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint OpenAPI
+        run: pnpm --filter "./packages/contracts/**" lint
+
+  compose-config:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose -f docker/docker-compose.yml config
+
+  pairwise-note:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Pairwise BFF × microservice
+        run: |
+          echo "Pairwise BFF×microservice matrix is opt-in."
+          echo "Enable extra combinations in scaffold.manifest.yaml when more than one BFF or MS is present."
+
+  plan-native:
+    runs-on: ubuntu-24.04
+    outputs:
+      has_native: ${{ steps.plan.outputs.has_native }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - id: plan
+        run: node scripts/repo.mjs ci-matrix
+
+  native:
+    needs: plan-native
+    if: ${{ needs.plan-native.outputs.has_native == 'true' }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.plan-native.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run native toolchain (${{ matrix.name }})
+        run: ${{ matrix.run }}

@@ -1,0 +1,603 @@
+version: 1
+defaults:
+  packageManager: pnpm@9.15.9
+  node: "22"
+  pnpm: 9.15.9
+  turbo: 2.5.8
+  awsRegion: eu-west-1
+  domainName: example.com
+
+topologies:
+  web-only:
+    description: Static web app plus shared packages. No BFF or microservice.
+    requiredRoles: [web-app, ui-package, domain-package]
+    optionalRoles: [design-tokens, design-system, storybook]
+    recommended:
+      web-app: react-app
+      ui-package: react-ui
+  web-bff-service:
+    description: Default vertical slice. UI computes locally; BFF proxies persist to a language-chosen service.
+    requiredRoles: [web-app, ui-package, domain-package, api-client, openapi, bff, service]
+    optionalRoles: [design-tokens, worker, cli]
+    recommended:
+      web-app: react-app
+      bff: express-bff
+      service: rust-api
+  direct-api:
+    description: HTTP API without a BFF. Web or other clients call the service.
+    requiredRoles: [service, domain-package, openapi]
+    optionalRoles: [web-app, api-client]
+  worker-queue:
+    description: Background consumer plus optional HTTP API.
+    requiredRoles: [worker]
+    optionalRoles: [service, queue-package]
+  library:
+    description: Shared packages only.
+    requiredRoles: [domain-package]
+    optionalRoles: [api-client, auth, logging, db-adapter]
+  multiplatform:
+    description: Mobile or desktop app that reuses TypeScript domain and API client packages.
+    requiredRoles: [multiplatform-app, domain-package, api-client]
+    optionalRoles: [web-app, bff, service]
+
+templates:
+  - id: typescript-calculator
+    tier: core
+    roles: [domain-package]
+    kind: package
+    source: assets/templates/packages/typescript-calculator
+    destination: packages/frontend/typescript/example-calculator
+    workspace: true
+    packageManager: pnpm
+    commands:
+      build: pnpm --filter @umbrella/example-calculator build
+      test: pnpm --filter @umbrella/example-calculator test
+      typecheck: pnpm --filter @umbrella/example-calculator typecheck
+    expectedFiles: [src/calculator.ts, src/calculator.test.ts, package.json]
+    deployment: [local-only]
+
+  - id: typescript-calculator-client
+    tier: core
+    roles: [api-client]
+    kind: package
+    source: assets/templates/packages/typescript-calculator-client
+    destination: packages/shared/typescript/calculator-client
+    workspace: true
+    packageManager: pnpm
+    commands:
+      test: pnpm --filter @umbrella/calculator-client test
+    expectedFiles: [src/index.ts, src/client.test.ts]
+    deployment: [local-only]
+
+  - id: openapi-calculator
+    tier: core
+    roles: [openapi]
+    kind: package
+    source: assets/templates/packages/openapi-calculator
+    destination: packages/contracts/openapi/calculator-api
+    workspace: true
+    packageManager: pnpm
+    commands:
+      lint: node scripts/lint-openapi.mjs packages/contracts/openapi/calculator-api/openapi.yaml
+      test: pnpm --filter @umbrella/calculator-api test
+    expectedFiles: [openapi.yaml, fixtures/get-value.json]
+    notes: Copy openapi.yaml and fixtures from assets/contracts/calculator as well.
+
+  - id: react-ui
+    tier: core
+    roles: [ui-package]
+    kind: package
+    source: assets/templates/frontend/react-ui
+    destination: packages/frontend/react/example-calculator
+    workspace: true
+    packageManager: pnpm
+    expectedFiles: [src/ExampleCalculator.tsx]
+    deployment: [static]
+
+  - id: angular-ui
+    tier: core
+    roles: [ui-package]
+    kind: package
+    source: assets/templates/frontend/angular-ui
+    destination: packages/frontend/angular/example-calculator
+    workspace: true
+    packageManager: pnpm
+    expectedFiles: [src/example-calculator.component.ts]
+    deployment: [static]
+
+  - id: vue-ui
+    tier: core
+    roles: [ui-package]
+    kind: package
+    source: assets/templates/frontend/vue-ui
+    destination: packages/frontend/vue/example-calculator
+    workspace: true
+    packageManager: pnpm
+    deployment: [static]
+
+  - id: svelte-ui
+    tier: core
+    roles: [ui-package]
+    kind: package
+    source: assets/templates/frontend/svelte-ui
+    destination: packages/frontend/svelte/example-calculator
+    workspace: true
+    packageManager: pnpm
+    deployment: [static]
+
+  - id: react-app
+    tier: core
+    roles: [web-app]
+    kind: application
+    source: assets/templates/frontend/react-app-overlay
+    destination: apps/frontend/react/example-app
+    workspace: true
+    generator: npm create vite@6.0.11 example-app -- --template react-ts
+    packageManager: pnpm
+    ports: { http: 4200 }
+    commands:
+      dev: pnpm --filter @umbrella/example-app dev
+    deployment: [static, container]
+    notes: Run the pinned Vite CLI, then overlay App.tsx and vite.config.ts.
+
+  - id: angular-app
+    tier: core
+    roles: [web-app]
+    kind: application
+    source: assets/templates/frontend/angular-app-overlay
+    destination: apps/frontend/angular/example-app
+    workspace: true
+    generator: pnpm --package=@angular/cli@19.2.0 dlx ng new example-app --routing --style=scss --skip-tests --skip-git --defaults
+    packageManager: pnpm
+    ports: { http: 4200 }
+    deployment: [static, container]
+    notes: Pin Angular CLI via pnpm dlx. Overlay app.ts and proxy.conf.cjs. Set preserveSymlinks.
+
+  - id: vue-app
+    tier: core
+    roles: [web-app]
+    kind: application
+    source: assets/templates/frontend/vue-app
+    destination: apps/frontend/vue/example-app
+    workspace: true
+    packageManager: pnpm
+    ports: { http: 4200 }
+    deployment: [static, container]
+
+  - id: svelte-app
+    tier: core
+    roles: [web-app]
+    kind: application
+    source: assets/templates/frontend/svelte-app
+    destination: apps/frontend/svelte/example-app
+    workspace: true
+    packageManager: pnpm
+    ports: { http: 4200 }
+    deployment: [static, container]
+
+  - id: next-app
+    tier: preview
+    roles: [web-app]
+    kind: application
+    source: assets/templates/frontend/next-app
+    destination: apps/frontend/next/example-app
+    workspace: true
+    packageManager: pnpm
+    ports: { http: 4200 }
+    deployment: [static, node-server]
+    incompatibilities: [static-cdk-ssr]
+    notes: Require deploymentMode static-export or node-server. Current CDK is static-only.
+
+  - id: design-tokens
+    tier: core
+    roles: [design-tokens]
+    kind: package
+    source: assets/templates/frontend/design-tokens
+    destination: packages/frontend/typescript/design-tokens
+    workspace: true
+    packageManager: pnpm
+    deployment: [local-only]
+
+  - id: react-design-system
+    tier: core
+    roles: [design-system]
+    kind: package
+    source: assets/templates/frontend/react-design-system
+    destination: packages/frontend/react/design-system
+    workspace: true
+    packageManager: pnpm
+    deployment: [local-only]
+
+  - id: react-storybook
+    tier: preview
+    roles: [storybook]
+    kind: application
+    source: assets/templates/frontend/react-storybook
+    destination: apps/frontend/storybook/example-storybook
+    workspace: true
+    packageManager: pnpm
+    ports: { http: 6006 }
+    deployment: [local-only]
+
+  - id: playwright-e2e
+    tier: core
+    roles: [e2e]
+    kind: package
+    source: assets/templates/frontend/playwright-e2e
+    destination: tests/e2e/example-app
+    workspace: true
+    packageManager: pnpm
+    commands:
+      e2e: pnpm --filter @umbrella/example-app-e2e test
+    deployment: [local-only]
+
+  - id: express-bff
+    tier: core
+    roles: [bff]
+    kind: application
+    source: assets/templates/backend/express-bff
+    destination: apps/backend/express/example-bff
+    workspace: true
+    packageManager: pnpm
+    runtime: node@22
+    ports: { http: 3000 }
+    health: /healthz
+    healthcheck: '["CMD","node","-e","fetch(''http://127.0.0.1:3000/healthz'').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]'
+    dockerContext: ..
+    dockerfile: apps/backend/express/example-bff/Dockerfile
+    commands:
+      test: pnpm --filter @umbrella/example-bff test
+      start: pnpm --filter @umbrella/example-bff start
+    lockfiles: [pnpm-lock.yaml]
+    deployment: [container]
+    expectedFiles: [src/app.ts, src/server.ts, src/app.test.ts]
+
+  - id: fastapi-bff
+    tier: core
+    roles: [bff]
+    kind: application
+    source: assets/templates/backend/fastapi-bff
+    destination: apps/backend/fastapi/example-bff
+    workspace: false
+    packageManager: uv
+    runtime: python@3.12
+    ports: { http: 3000 }
+    health: /healthz
+    healthcheck: '["CMD","python","-c","import urllib.request; urllib.request.urlopen(''http://127.0.0.1:3000/healthz'')"]'
+    dockerContext: ../apps/backend/fastapi/example-bff
+    dockerfile: Dockerfile
+    commands:
+      test: uv run pytest
+      lint: uv run ruff check .
+    lockfiles: [uv.lock]
+    deployment: [container]
+
+  - id: dotnet-bff
+    tier: core
+    roles: [bff]
+    kind: application
+    source: assets/templates/backend/dotnet-bff
+    destination: apps/backend/dotnet/example-bff
+    workspace: false
+    packageManager: nuget
+    runtime: dotnet@8.0
+    ports: { http: 3000 }
+    health: /healthz
+    healthcheck: '["CMD-SHELL","curl -f http://127.0.0.1:3000/healthz || exit 1"]'
+    dockerContext: ../apps/backend/dotnet/example-bff
+    dockerfile: Dockerfile
+    commands:
+      test: dotnet test ExampleBff.sln
+      format:check: dotnet format --verify-no-changes
+    lockfiles: [**/packages.lock.json]
+    deployment: [container]
+
+  - id: python-api
+    tier: core
+    roles: [service]
+    kind: application
+    source: assets/templates/backend/python-api
+    destination: apps/backend/python/example-calculator
+    workspace: false
+    packageManager: uv
+    runtime: python@3.12
+    ports: { http: 8081 }
+    health: /healthz
+    healthcheck: '["CMD","python","-c","import urllib.request; urllib.request.urlopen(''http://127.0.0.1:8081/healthz'')"]'
+    dockerContext: ../apps/backend/python/example-calculator
+    dockerfile: Dockerfile
+    commands:
+      test: uv run pytest
+    lockfiles: [uv.lock]
+    deployment: [container]
+
+  - id: go-api
+    tier: core
+    roles: [service]
+    kind: application
+    source: assets/templates/backend/go-api
+    destination: apps/backend/go/example-calculator
+    workspace: false
+    packageManager: go
+    runtime: go@1.23
+    ports: { http: 8081 }
+    health: /healthz
+    healthcheck: '["CMD-SHELL","curl -f http://127.0.0.1:8081/healthz || exit 1"]'
+    dockerContext: ../apps/backend/go/example-calculator
+    dockerfile: Dockerfile
+    commands:
+      test: go test ./...
+      vet: go vet ./...
+    lockfiles: [go.sum]
+    deployment: [container]
+
+  - id: rust-api
+    tier: core
+    roles: [service]
+    kind: application
+    source: assets/templates/backend/rust-api
+    destination: apps/backend/rust/example-calculator
+    workspace: false
+    packageManager: cargo
+    runtime: rust@1.85.0
+    ports: { http: 8081 }
+    health: /healthz
+    healthcheck: '["CMD-SHELL","curl -f http://127.0.0.1:8081/healthz || exit 1"]'
+    dockerContext: ../apps/backend/rust/example-calculator
+    dockerfile: Dockerfile
+    commands:
+      test: cargo test --locked
+      lint: cargo clippy --all-targets -- -D warnings
+    lockfiles: [Cargo.lock]
+    deployment: [container]
+
+  - id: express-api
+    tier: core
+    roles: [service]
+    kind: application
+    source: assets/templates/backend/express-api
+    destination: apps/backend/express/example-calculator
+    workspace: true
+    packageManager: pnpm
+    runtime: node@22
+    ports: { http: 8081 }
+    health: /healthz
+    healthcheck: '["CMD","node","-e","fetch(''http://127.0.0.1:8081/healthz'').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]'
+    dockerContext: ..
+    dockerfile: apps/backend/express/example-calculator/Dockerfile
+    deployment: [container]
+
+  - id: dotnet-api
+    tier: core
+    roles: [service]
+    kind: application
+    source: assets/templates/backend/dotnet-api
+    destination: apps/backend/dotnet/example-calculator
+    workspace: false
+    packageManager: nuget
+    runtime: dotnet@8.0
+    ports: { http: 8081 }
+    health: /healthz
+    healthcheck: '["CMD-SHELL","curl -f http://127.0.0.1:8081/healthz || exit 1"]'
+    dockerContext: ../apps/backend/dotnet/example-calculator
+    dockerfile: Dockerfile
+    deployment: [container]
+
+  - id: java-spring-api
+    tier: preview
+    roles: [service]
+    kind: application
+    source: assets/templates/backend/java-spring-api
+    destination: apps/backend/java-spring/example-calculator
+    workspace: false
+    packageManager: gradle
+    runtime: jdk@21
+    ports: { http: 8081 }
+    health: /healthz
+    commands:
+      test: ./gradlew test
+      run: ./gradlew bootRun
+    notes: Generate Gradle wrapper 8.12.1 at scaffold time. Do not vendor a wrapper jar in the skill.
+    deployment: [container]
+
+  - id: kotlin-ktor-api
+    tier: preview
+    roles: [service]
+    kind: application
+    source: assets/templates/backend/kotlin-ktor-api
+    destination: apps/backend/kotlin-ktor/example-calculator
+    workspace: false
+    packageManager: gradle
+    runtime: jdk@21
+    ports: { http: 8081 }
+    health: /healthz
+    deployment: [container]
+    notes: Preview. Generate Gradle wrapper 8.12.1 at scaffold time.
+
+  - id: express-worker
+    tier: core
+    roles: [worker]
+    kind: application
+    source: assets/templates/backend/express-worker
+    destination: apps/backend/express/example-worker
+    workspace: true
+    packageManager: pnpm
+    ports: { http: 3001 }
+    health: /healthz
+    deployment: [container]
+
+  - id: typescript-auth
+    tier: core
+    roles: [auth]
+    kind: package
+    source: assets/templates/packages/typescript-auth
+    destination: packages/shared/typescript/auth
+    workspace: true
+    packageManager: pnpm
+    deployment: [local-only]
+
+  - id: typescript-logging
+    tier: core
+    roles: [logging]
+    kind: package
+    source: assets/templates/packages/typescript-logging
+    destination: packages/shared/typescript/logging
+    workspace: true
+    packageManager: pnpm
+    deployment: [local-only]
+
+  - id: typescript-db-adapter
+    tier: core
+    roles: [db-adapter]
+    kind: package
+    source: assets/templates/packages/typescript-db-adapter
+    destination: packages/shared/typescript/db-adapter
+    workspace: true
+    packageManager: pnpm
+    deployment: [local-only]
+
+  - id: typescript-queue
+    tier: core
+    roles: [queue-package]
+    kind: package
+    source: assets/templates/packages/typescript-queue
+    destination: packages/shared/typescript/queue
+    workspace: true
+    packageManager: pnpm
+    deployment: [local-only]
+
+  - id: typescript-integration
+    tier: core
+    roles: [integration]
+    kind: package
+    source: assets/templates/packages/typescript-integration
+    destination: packages/shared/typescript/integration
+    workspace: true
+    packageManager: pnpm
+    deployment: [local-only]
+
+  - id: typescript-cli
+    tier: core
+    roles: [cli]
+    kind: application
+    source: assets/templates/apps/cli-typescript
+    destination: apps/cli/typescript/examplectl
+    workspace: true
+    packageManager: pnpm
+    deployment: [local-only]
+
+  - id: typescript-scheduled-task
+    tier: core
+    roles: [scheduled-task]
+    kind: application
+    source: assets/templates/apps/scheduled-typescript
+    destination: apps/backend/typescript/example-task
+    workspace: true
+    packageManager: pnpm
+    deployment: [local-only]
+
+  - id: expo-app
+    tier: preview
+    roles: [multiplatform-app]
+    kind: application
+    source: assets/templates/multiplatform/expo
+    destination: apps/mobile/expo/example-app
+    workspace: true
+    packageManager: pnpm
+    requiredTools: [xcode, android-sdk]
+    deployment: [mobile]
+    notes: Show native toolchain, signing, EAS secret, and simulator tradeoffs before generating.
+
+  - id: tauri-app
+    tier: preview
+    roles: [multiplatform-app]
+    kind: application
+    source: assets/templates/multiplatform/tauri
+    destination: apps/desktop/tauri/example-app
+    workspace: true
+    packageManager: pnpm
+    requiredTools: [rustc, cargo]
+    deployment: [desktop]
+    notes: Signing and updater values stay outside the repo.
+
+  - id: capacitor-app
+    tier: preview
+    roles: [multiplatform-app]
+    kind: application
+    source: assets/templates/multiplatform/capacitor
+    destination: apps/mobile/capacitor/example-app
+    workspace: true
+    packageManager: pnpm
+    requiredTools: [xcode, android-sdk]
+    deployment: [mobile]
+
+  - id: electron-app
+    tier: preview
+    roles: [multiplatform-app]
+    kind: application
+    source: assets/templates/multiplatform/electron
+    destination: apps/desktop/electron/example-app
+    workspace: true
+    packageManager: pnpm
+    deployment: [desktop]
+    notes: contextIsolation true, nodeIntegration false. Promote Tauri or Electron, not both by default.
+
+  - id: flutter-app
+    tier: recipe
+    roles: [multiplatform-app]
+    kind: recipe
+    source: assets/templates/recipes/flutter
+    destination: apps/mobile/flutter/example_app
+    workspace: false
+    packageManager: pub
+    deployment: [mobile]
+
+  - id: kmp-app
+    tier: recipe
+    roles: [multiplatform-app]
+    kind: recipe
+    source: assets/templates/recipes/kmp
+    destination: apps/mobile/kmp/example-app
+    workspace: false
+    packageManager: gradle
+    deployment: [mobile]
+
+  - id: maui-app
+    tier: recipe
+    roles: [multiplatform-app]
+    kind: recipe
+    source: assets/templates/recipes/maui
+    destination: apps/mobile/dotnet-maui/ExampleApp
+    workspace: false
+    packageManager: nuget
+    deployment: [mobile]
+
+  - id: rails-api
+    tier: recipe
+    roles: [service]
+    kind: recipe
+    source: assets/templates/recipes/rails-api
+    destination: apps/backend/rails/example-calculator
+    workspace: false
+    packageManager: bundler
+    deployment: [container]
+
+  - id: laravel-api
+    tier: recipe
+    roles: [service]
+    kind: recipe
+    source: assets/templates/recipes/laravel-api
+    destination: apps/backend/laravel/example-calculator
+    workspace: false
+    packageManager: composer
+    deployment: [container]
+
+  - id: phoenix-api
+    tier: recipe
+    roles: [service]
+    kind: recipe
+    source: assets/templates/recipes/phoenix-api
+    destination: apps/backend/phoenix/example-calculator
+    workspace: false
+    packageManager: mix
+    deployment: [container]
