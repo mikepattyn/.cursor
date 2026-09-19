@@ -1,6 +1,0 @@
-{
-  "identifier": "default",
-  "description": "Minimal window capability. No filesystem or shell.",
-  "windows": ["main"],
-  "permissions": ["core:default"]
-}

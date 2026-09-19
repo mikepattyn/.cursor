@@ -4,4 +4,4 @@
 - Versions are **independent**. A change in one leaf does not bump siblings.
 - npm publish is **opt-in**. Set `publishable: true` in `scaffold.manifest.yaml` and add a `.changeset` directory before the release workflow calls Changesets.
 - Without those, `release.yml` is a no-op for npm.
-- uv, `dotnet pack`, and `cargo publish` are per-leaf and never go through npm.
+- `dotnet pack` is per-leaf and never goes through npm.

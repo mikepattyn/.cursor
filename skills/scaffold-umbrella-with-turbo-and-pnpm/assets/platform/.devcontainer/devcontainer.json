@@ -9,5 +9,5 @@
   },
   "postCreateCommand": "corepack enable && corepack prepare pnpm@9.15.9 --activate",
   "remoteUser": "node",
-  "comment": "Opt-in Node 22 only. Not a universal image. Add rust/go/dotnet/python or docker-in-docker features only when that leaf is present."
+  "comment": "Opt-in Node 22. Add the .NET 10 SDK feature when editing the API in the container."
 }

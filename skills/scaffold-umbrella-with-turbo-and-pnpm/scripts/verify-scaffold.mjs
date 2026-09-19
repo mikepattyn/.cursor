@@ -35,8 +35,11 @@ if (!existsSync(catalogPath)) {
   fail(`missing catalog ${catalogPath}`);
 } else {
   const catalog = readFileSync(catalogPath, 'utf8');
-  if (!catalog.includes('templates:') || !catalog.includes('id:')) {
-    fail('catalog is missing templates');
+  if (!catalog.includes('templates:') || !catalog.includes('id: angular-app') || !catalog.includes('id: dotnet-api')) {
+    fail('catalog must list angular-app and dotnet-api');
+  }
+  if (catalog.includes('react-app') || catalog.includes('express-bff') || catalog.includes('rust-api')) {
+    fail('catalog still lists unused stacks');
   }
   if (catalog.includes('@latest') || catalog.includes('vite@latest')) {
     fail('catalog must not use unpinned latest generators');
@@ -54,12 +57,10 @@ if (!existsSync(schemaPath)) {
 
 const requiredSkillFiles = [
   'assets/contracts/calculator/openapi.yaml',
-  'assets/templates/backend/express-bff/src/app.ts',
-  'assets/templates/backend/fastapi-bff/app/main.py',
-  'assets/templates/backend/dotnet-bff/src/ExampleBff/Program.cs',
-  'assets/templates/backend/python-api/app/main.py',
-  'assets/templates/backend/go-api/cmd/api/main.go',
-  'assets/templates/backend/rust-api/src/lib.rs',
+  'assets/templates/frontend/angular-app-overlay/app.ts',
+  'assets/templates/frontend/angular-app-overlay/proxy.conf.cjs',
+  'assets/templates/frontend/angular-ui/src/example-calculator.component.ts',
+  'assets/templates/backend/dotnet-api/src/ExampleApi/Program.cs',
   'assets/templates/packages/typescript-calculator-client/src/index.ts',
   'scripts/copy-template.mjs',
 ];
@@ -88,6 +89,9 @@ if (target) {
     if (yaml.includes('__')) {
       fail('scaffold.manifest.yaml still has unresolved tokens');
     }
+    if (!yaml.includes('angular-app') || !yaml.includes('dotnet-api')) {
+      fail('manifest must select angular-app and dotnet-api');
+    }
   }
   for (const forbidden of ['accessKey', 'accessKeyId']) {
     walk(join(target, 'infra'), (path) => {
@@ -103,7 +107,7 @@ if (target) {
     if (!text.includes('healthcheck:')) {
       fail('compose is missing healthcheck');
     }
-    if (text.includes('__BFF_') || text.includes('__FRAMEWORK__')) {
+    if (text.includes('__BFF_') || text.includes('__FRAMEWORK__') || text.includes('__MS_')) {
       fail('compose still has placeholders');
     }
   }

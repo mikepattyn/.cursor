@@ -15,7 +15,7 @@ app.MapGet("/readyz", (CalculatorStore store) =>
         ? Results.Json(new { status = "ok" })
         : Results.Json(new { status = "unavailable" }, statusCode: 503));
 
-app.MapGet("/value", (CalculatorStore store) =>
+app.MapGet("/api/calculator/value", (CalculatorStore store) =>
 {
     try
     {
@@ -27,7 +27,7 @@ app.MapGet("/value", (CalculatorStore store) =>
     }
 });
 
-app.MapPut("/value", async (HttpContext context, CalculatorStore store) =>
+app.MapPut("/api/calculator/value", async (HttpContext context, CalculatorStore store) =>
 {
     ValueBody? body;
     try

@@ -20,7 +20,7 @@ public class ApiTests
     {
         using var factory = Factory();
         var client = factory.CreateClient();
-        var response = await client.GetAsync("/value");
+        var response = await client.GetAsync("/api/calculator/value");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         Assert.Equal(JsonValueKind.Null, json.RootElement.GetProperty("value").ValueKind);
@@ -31,9 +31,9 @@ public class ApiTests
     {
         using var factory = Factory();
         var client = factory.CreateClient();
-        var put = await client.PutAsJsonAsync("/value", new { value = 12d });
+        var put = await client.PutAsJsonAsync("/api/calculator/value", new { value = 12d });
         Assert.Equal(HttpStatusCode.OK, put.StatusCode);
-        var got = await client.GetFromJsonAsync<JsonElement>("/value");
+        var got = await client.GetFromJsonAsync<JsonElement>("/api/calculator/value");
         Assert.Equal(12, got.GetProperty("value").GetDouble());
     }
 

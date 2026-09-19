@@ -1,4 +1,4 @@
-const target = process.env.BFF_PROXY_TARGET || 'http://localhost:3000';
+const target = process.env.API_PROXY_TARGET || 'http://localhost:3000';
 
 module.exports = {
   '/api': {

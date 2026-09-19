@@ -20,7 +20,7 @@ describe('calculator contract fixtures', () => {
 
   it('OpenAPI document names the persist path', () => {
     const spec = readFileSync(join(root, 'openapi.yaml'), 'utf8');
-    assert.match(spec, /\/value:/);
+    assert.match(spec, /\/api\/calculator\/value:/);
     assert.match(spec, /operationId: getValue/);
   });
 });

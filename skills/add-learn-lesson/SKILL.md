@@ -6,7 +6,7 @@ description: >-
   extend the First contact email path, publish curriculum to mikepattyn/learn,
   or mentions add-learn-lesson. Do not use for the private teach workspace
   (MISSION.md / HTML lessons) or for portfolio Under the Hood articles
-  (umbrella-teach). Do not use for scaffold-umbrella-with-turbo-and-pnpm.
+  (umbrella-teach). Do not use for the Angular + .NET scaffold skill.
 argument-hint: "What should the next lesson teach?"
 license: MIT
 metadata:

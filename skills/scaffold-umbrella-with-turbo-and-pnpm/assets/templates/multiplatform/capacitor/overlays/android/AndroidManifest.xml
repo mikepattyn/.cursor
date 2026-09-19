@@ -1,7 +1,0 @@
-<!-- Overlay snippet. Merge into the generated AndroidManifest after `npx cap add android`. -->
-<manifest>
-  <uses-permission android:name="android.permission.INTERNET" />
-  <application android:usesCleartextTraffic="true">
-    <activity android:name=".MainActivity" android:exported="true" />
-  </application>
-</manifest>

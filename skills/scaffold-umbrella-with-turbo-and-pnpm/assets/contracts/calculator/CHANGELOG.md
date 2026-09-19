@@ -2,6 +2,6 @@
 
 ## 0.1.0
 
-- `GET|PUT /value` on the microservice.
-- BFF prefixes the same operations with `/api/calculator`.
-- `GET /healthz` and `GET /readyz` are required on every generated service.
+- `GET|PUT /api/calculator/value` on the .NET API.
+- Angular proxies same-origin `/api` to the API.
+- `GET /healthz` and `GET /readyz` are required on the API.

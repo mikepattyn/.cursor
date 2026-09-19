@@ -41,6 +41,4 @@ jobs:
     steps:
       - name: Native publish notes
         run: |
-          echo "uv: bump versions in pyproject.toml and publish from that project, not npm."
           echo "dotnet: pack with dotnet pack; do not wrap as an npm package."
-          echo "cargo: publish from the crate directory when crates.io is opted in."

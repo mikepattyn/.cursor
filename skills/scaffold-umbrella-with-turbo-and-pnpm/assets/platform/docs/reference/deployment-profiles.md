@@ -2,11 +2,8 @@
 
 | Profile | Use |
 | --- | --- |
-| `local-only` | Host `pnpm` / native binaries. No container publish. |
-| `container` | Docker Compose or a single service image. Non-root, `start` not `dev`. |
-| `static` | `DEPLOYMENT_MODE=static-export` (Next) or a Vite/Angular static build behind CloudFront/S3. No Route Handlers. |
-| `node-server` | Long-running Node (`next start`, Express BFF). |
-| `mobile` | Expo / Capacitor. Signing stays outside the repo. |
-| `desktop` | Tauri / Electron. Signing is external. |
+| `local-only` | Host `pnpm` / `dotnet run`. No container publish. |
+| `container` | Docker Compose. Non-root, API `start` not `dev`. |
+| `static` | Angular static build behind CloudFront/S3. |
 
-Pick one profile per leaf in `scaffold.manifest.yaml`. Do not mix `static` and `node-server` in the same Next image.
+Pick one profile per leaf in `scaffold.manifest.yaml`. CDK hosts the Angular app only. It does not deploy the .NET API.

@@ -11,50 +11,33 @@ services:
     volumes:
       - ..:/workspace
       - example-app-node-modules:/workspace/node_modules
-      - example-app-app-node-modules:/workspace/apps/frontend/__FRAMEWORK__/example-app/node_modules
+      - example-app-app-node-modules:/workspace/apps/frontend/angular/example-app/node_modules
     environment:
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: "200"
-      BFF_PROXY_TARGET: http://example-bff:3000
+      API_PROXY_TARGET: http://example-api:3000
     working_dir: /workspace
     init: true
     stdin_open: true
     tty: true
     depends_on:
-      example-bff:
+      example-api:
         condition: service_healthy
 
-  example-bff:
+  example-api:
     build:
-      context: __BFF_CONTEXT__
-      dockerfile: __BFF_DOCKERFILE__
-    image: umbrella-example-bff:local
+      context: ../apps/backend/dotnet/example-api
+      dockerfile: Dockerfile
+    image: umbrella-example-api:local
     ports:
       - "3000:3000"
-    environment:
-      CALCULATOR_URL: http://example-calculator:8081
-    healthcheck:
-      test: __BFF_HEALTHCHECK__
-      interval: 5s
-      timeout: 3s
-      retries: 12
-    depends_on:
-      example-calculator:
-        condition: service_healthy
-
-  example-calculator:
-    build:
-      context: __MS_CONTEXT__
-      dockerfile: __MS_DOCKERFILE__
-    image: umbrella-example-calculator:local
-    ports:
-      - "8081:8081"
     volumes:
       - calculator-sqlite:/data
     environment:
+      ASPNETCORE_URLS: http://0.0.0.0:3000
       SQLITE_PATH: /data/calculator.db
     healthcheck:
-      test: __MS_HEALTHCHECK__
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:3000/healthz || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 12

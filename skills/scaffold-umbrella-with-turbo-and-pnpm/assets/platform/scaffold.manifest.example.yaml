@@ -1,6 +1,6 @@
 version: 1
 umbrella: umbrella
-topology: web-bff-service
+topology: angular-dotnet
 mode: generate
 phases:
   inputs: done
@@ -9,36 +9,29 @@ selected:
   - typescript-calculator
   - typescript-calculator-client
   - openapi-calculator
-  - react-ui
-  - react-app
-  - express-bff
-  - rust-api
+  - angular-ui
+  - angular-app
+  - dotnet-api
 identifiers:
   folder: umbrella
   npmScope: "@umbrella"
   dockerProject: umbrella
-  javaPackage: com.umbrella
   dotnetNamespace: Umbrella
-  rustCrate: umbrella
-  bundleId: com.umbrella.example
 ports:
   web: 4200
-  bff: 3000
-  service: 8081
+  api: 3000
 commands:
   check: pnpm exec turbo run build test lint typecheck format:check
   test: pnpm exec turbo run test
   typecheck: pnpm exec turbo run typecheck
   format:check: pnpm exec turbo run format:check
   contract:test: pnpm --filter @umbrella/calculator-api test
-  e2e: pnpm --filter @umbrella/example-app-e2e test
   dev:web: pnpm --filter @umbrella/example-app dev
   dev:full: docker compose -f docker/docker-compose.yml up --build
 native:
-  rust-api: cargo test --manifest-path apps/backend/rust/example-calculator/Cargo.toml
+  dotnet-api: dotnet test apps/backend/dotnet/example-api/ExampleApi.sln
 deployment:
   web: static
-  bff: container
-  service: container
+  api: container
 publishable: false
 versioning: independent
